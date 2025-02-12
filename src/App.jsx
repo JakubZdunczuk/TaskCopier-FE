@@ -1,6 +1,7 @@
 import './App.css';
 import TaskListComponent from "./components/TaskListComponent";
 import HeaderComponent from "./components/HeaderComponent";
+import AddTaskComponent from "./components/AddTaskComponent";
 import FooterComponent from "./components/FooterComponent";
 import {BrowserRouter, Route, Routes} from "react-router-dom";
 
@@ -14,7 +15,7 @@ function App() {
                 <HeaderComponent/>
                 <Routes>
                     <Route path="/" element={<TaskListComponent/>}></Route>
-                    {/*<Route path="/add" element={<div/>}></Route>*/}
+                    <Route path="/add" element={<AddTaskComponent/>}></Route>
                 </Routes>
                 <FooterComponent/>
             </BrowserRouter>

@@ -1,30 +1,36 @@
 import React, {useEffect, useState} from "react";
 import {Button} from "react-native";
-import {copyTask, taskList} from "../services/TaskService";
+import {createTask, projectsList, tasksList} from "../services/TaskService";
 
 function TaskListComponent() {
     const [tasks, setTasks] = useState([])
     const [link, setLink] = useState([])
-
+    const [projects, setProjects] = useState([])
 
     useEffect(() => {
-        getTasks()
+        getTasks();
+
+        projectsList().then((response) => {
+            setProjects(response.data);
+        }).catch(error => {
+            console.error(error);
+        })
     }, []);
 
+
     function getTasks() {
-            taskList().then((response) => {
-                console.log(response)
-                setTasks(response.data);
-            }).catch(error => {
-                console.error(error);
-            })
+        tasksList().then((response) => {
+            setTasks(response.data);
+        }).catch(error => {
+            console.error(error);
+        })
     }
 
-
     function clickButton(task) {
-        copyTask(task).then((response) => {
-            console.log(response.data.self);
+        let projectId = task.project.externalId === "10000" ? "10001" : "10000";
+        createTask(task, projectId).then((response) => {
             setLink({...response.data, copiedTaskId: task.id});
+            console.log(response);
             console.log(link)
         }).catch(error => {
             console.error(error);
@@ -44,7 +50,7 @@ function TaskListComponent() {
                     <tr>
                         <th>taskId</th>
                         <th>title</th>
-                        <th>projectId</th>
+                        <th>projectName</th>
                         <th>description</th>
                         <th>actions</th>
                         <th>links to copied task</th>
@@ -54,16 +60,30 @@ function TaskListComponent() {
                     {
                         tasks.map(task =>
                             <tr key={task.id}>
-                                <td>{task.id}</td>
+                                <td>{task.externalId}</td>
                                 <td>{task.title}</td>
-                                <td>{task.projectId}</td>
+                                <td>{task.project.name}</td>
                                 <td>{task.description}</td>
                                 <td>
-                                    <Button
-                                        title={checkIfTaskIsCopied(task, link) ? "You just copied this task!" : "Copy task from one project to the second"}
-                                        onPress={() => clickButton(task)}
-                                        disabled={checkIfTaskIsCopied(task, link)}>
-                                    </Button>
+                                    {/*@TODO: choosing where to copy*/}
+                                    {/*<select name="selectedProjectId" value ={}>*/}
+                                    {/*    <option value="" disabled="true">Choose where to copy</option>*/}
+                                    {/*    {projects.map(project =>*/}
+                                    {/*        <option key={project.id}*/}
+                                    {/*                disabled={project.externalId === task.project.externalId}*/}
+                                    {/*                value={project.externalId}>*/}
+                                    {/*            {project.key}*/}
+                                    {/*        </option>)*/}
+                                    {/*    }*/}
+                                    {/*</select>*/}
+                                    <div className="row-cols-1">
+                                        <Button
+                                            title={checkIfTaskIsCopied(task, link) ? "You just copied this task!" : "Copy task to chosen project"}
+                                            onPress={() => clickButton(task)}
+                                            disabled={checkIfTaskIsCopied(task, link)}
+                                            type="submit">
+                                        </Button>
+                                    </div>
                                 </td>
                                 <td>
                                     <div className="row">
@@ -84,4 +104,5 @@ function checkIfTaskIsCopied(task, link) {
     return task.id === link.copiedTaskId;
 
 }
+
 export default TaskListComponent
